@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use App\PostStatus;
+use App\Enums\PostStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use function Termwind\terminal;
 
 class Post extends Model
 {

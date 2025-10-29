@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use Dotenv\Validator;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,5 +70,24 @@ class BaseApiController extends Controller
             'image' => $post->image ? asset('storage/' . $post->image) : null, // абсолютная ссылка!!!
             'created_at' => $post->created_at->format('d.m.Y H:i'),
         ];
+    }
+
+    /**
+     * обработка добавления изображения
+     */
+    protected function handleImageUpload(Request $request, $existingPost = null): ?string
+    {
+        if (!$request->hasFile('image')) {
+            return null;
+        }
+
+        //  есть старое изображение - удаляем
+        if ($existingPost && $existingPost->image) {
+            Storage::disk('public')->delete($existingPost->image);
+        }
+
+        // cохраняем новое
+        $path = $request->file('image')->store('posts', 'public');
+        return $path;
     }
 }
