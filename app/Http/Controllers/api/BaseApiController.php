@@ -52,26 +52,6 @@ class BaseApiController extends Controller
         return true;
     }
 
-
-    /**
-     * форматирует пост для API
-     */
-    protected function formatPost($post): array
-    {
-        return [
-            'id' => $post->id,
-            'user_id' => $post->user_id,
-            'title' => $post->title,
-            'text' => $post->text,
-            'category_id' => $post->post_category_id,
-            'category_name' => $post->category->name ?? null,
-            'status' => $post->status,
-            'status_text' => $post->getStatusLabel(),
-            'image' => $post->image ? asset('storage/' . $post->image) : null, // абсолютная ссылка!!!
-            'created_at' => $post->created_at->format('d.m.Y H:i'),
-        ];
-    }
-
     /**
      * обработка добавления изображения
      */

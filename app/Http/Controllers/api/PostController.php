@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\PostStatus;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Http\Resources\PostResource;
 
 class PostController extends BaseApiController
 {
@@ -30,8 +31,8 @@ class PostController extends BaseApiController
             }
 
             //фильтр по категории
-            if ($request->has('category_id')) {
-                $query->where('post_category_id', $request->category_id);
+            if ($request->has('category')) {
+                $query->where('post_category_id', $request->category);
             }
 
             //страницы
@@ -40,12 +41,9 @@ class PostController extends BaseApiController
 
             $posts = $query->paginate($perPage, ['*'], 'page', $page);
 
-            $formatedPosts = $posts->map(function ($post) {
-                return $this->formatPost($post);
-            });
 
             return $this->successResponse([
-                'posts' => $formatedPosts,
+                'posts' => PostResource::collection($posts->items()),
                 'pagination' => [
                     'current_page' => $posts->currentPage(),
                     'per_page' => $posts->perPage(),
@@ -75,7 +73,7 @@ class PostController extends BaseApiController
             }
 
             return $this->successResponse(
-                $this->formatPost($post),
+                new PostResource($post),
                 'Пост успешно получен!'
             );
         }catch(\Exception $e){
@@ -88,7 +86,7 @@ class PostController extends BaseApiController
             $validator = $this->validateRequest($request, [
                 'title' => 'required|string|max:255',
                 'text' => 'required|string|min:10',
-                'category_id' => 'required|exists:post_category,id',
+                'category_id' => 'required|exists:post_categories,id',
                 'image' => 'sometimes|image|max:2048',
             ]);
 
@@ -97,7 +95,7 @@ class PostController extends BaseApiController
             }
 
             $post = Post::create([
-                'user_id' => 1, // Временно для тестирования
+                'user_id' => auth()->id(),
                 'title' => $request->title,
                 'text' => $request->text,
                 'post_category_id' => $request->category_id,
@@ -108,7 +106,7 @@ class PostController extends BaseApiController
             $post->load('category');
 
             return $this->successResponse(
-                $this->formatPost($post),
+                new PostResource($post),
                 'Пост успешно создан и отправлен на модерацию',
                 201
             );
@@ -157,7 +155,7 @@ class PostController extends BaseApiController
             $post->load('category');
 
             return $this->successResponse(
-                $this->formatPost($post),
+                new PostResource($post),
                 'Пост успешно обновлен'
             );
 

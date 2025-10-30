@@ -1,24 +1,23 @@
 <?php
 
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::middleware('api')->group(function () {
-
-    // Public routes
-    Route::get('/posts', [PostController::class, 'index']);
-    Route::get('/posts/{id}', [PostController::class, 'show']);
-
-    // Protected routes (пока без auth)
-    Route::post('/posts', [PostController::class, 'store']);
-    Route::put('/posts/{id}', [PostController::class, 'update']);
-    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-
-    // Authentication
-    Route::post('/user/login', function () {
-        return response()->json(['message' => 'Login endpoint']);
-    });
+// без авторизации
+Route::get('/post', [PostController::class, 'index']);
+Route::get('/post/{id}', [PostController::class, 'show']);
+// авторизация
+Route::post('/user/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/post', [PostController::class, 'store']);
+    Route::put('/post/{id}', [PostController::class, 'update']);
+    Route::delete('/post/{id}', [PostController::class, 'destroy']);
 });
+
+
+
+
 
 
