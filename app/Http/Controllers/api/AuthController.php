@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
@@ -43,5 +42,46 @@ class AuthController extends BaseApiController
             ],
             'token' => $token,
         ], 'Успешная авторизация');
+    }
+
+    /**
+     * POST /api/user/register
+     * регистрация нового пользователя
+     */
+    public function register(Request $request)
+    {
+        $validator = $this->validateRequest($request, [
+            'name' => 'required|string|max:255|min:2',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator !== true) {
+            return $this->errorResponse('Ошибка валидации', $validator, 422);
+        }
+
+        try {
+            // Создаём нового пользователя
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Создаём токен для автоматической авторизации после регистрации
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            return $this->successResponse([
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+                'token' => $token,
+            ], 'Регистрация успешна. Вы авторизованы', 201);
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Ошибка при регистрации: ' . $e->getMessage(), null, 500);
+        }
     }
 }

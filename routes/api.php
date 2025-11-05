@@ -9,6 +9,7 @@ Route::get('/post', [PostController::class, 'index']);
 Route::get('/post/{id}', [PostController::class, 'show']);
 // авторизация
 Route::post('/user/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('/user/register', [AuthController::class, 'register']);
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/post', [PostController::class, 'store']);
